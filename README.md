@@ -8,8 +8,6 @@ The source code is currently being cleaned for publication. Will be pushed soon,
 * [**Stéphane Calderon**](https://www.linkedin.com/in/st%C3%A9phane-calderon-509ab628/?ppe=1) 
 * [**Tamy Boubekeur**](https://www.telecom-paristech.fr/~boubek)
 
-See also the list of [contributors](https://github.com/superboubek/bcd/contributors) who participated in this project.
-
 ## Citation
 
 Please cite the following paper in case you are using this code:
