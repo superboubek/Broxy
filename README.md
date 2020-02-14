@@ -9,11 +9,7 @@ ACM Transaction on Graphics - Proc. SIGGRAPH 2017
 ### Temporary release!
 
 For now, only the core of the paper will be released online. This is mainly the GMorpho library which allows to voxelize, perform high speed morphology on GPU and extract a high res. mesh from it.
-The rest of the code (graphics interface and constrained mesh optimizer) will be released in the future, as soon as we figure out license issues.
-
-The current archive contains a full running version, with the exact code used for the paper. 
-
-Please do not distribute this version and refer to the online github repository for future updates.
+The rest of the code (graphics interface and constrained mesh optimizer) will be released in the future, as soon as we figure out the right license to use.
 
 ## About
 
