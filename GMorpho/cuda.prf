@@ -1,0 +1,81 @@
+# QMake feature file to simplify/wrap CUDA compiler setup
+# Refer to qmakecuda.pro for an example
+#
+# More information:
+# http://cudaspace.wordpress.com/2011/04/07/qt-creator-cuda-linux/
+# https://devtalk.nvidia.com/default/topic/366955/cuda-programming-and-performance/qmake-build-script-for-cuda/
+# http://stackoverflow.com/questions/10932402/qtcreators-qmake-with-nvcc-and-cuda-windows-7
+
+#------------------------------- SETUP COMPILER  -------------------------------
+#
+#  
+# @note this autolookup with "which" should only work for unix systems
+#-------------------------------------------------------------------------------
+#!macx:warning(This configuration file was built for Mac OSX. You might need \
+#              some tweaking to get it to work for other OS's)
+
+#------------------------------- SETUP COMPILER  -------------------------------
+#
+#  
+# @note this autolookup with "which" should only work for unix systems
+#-------------------------------------------------------------------------------
+# first attempt to auto-detect (possible if nvcc is added to path)
+CUDA = $$system(which nvcc | sed 's,/bin/nvcc$,,')
+# then attempt to fetch it from a /usr/local/cuda
+CUDA = $$system(which /usr/local/cuda/bin/nvcc | sed 's,/bin/nvcc$,,')
+#CUDA = $$system(which /usr/bin/nvcc | sed 's,/bin/nvcc$,,')
+# then attempt to fetch it from a user-set environment variable
+isEmpty(CUDA):CUDA=$$[CUDA]
+# nothing else possible
+isEmpty(CUDA):error(CUDA could not be found)
+NVCC = $$CUDA/bin/nvcc
+# compile 64 bits by default
+NVCC_OPTS += -m64
+NVCC_OPTS += --compiler-bindir=/usr/bin/g++-4.8
+
+#--------------------------------- SETUP FLAGS ---------------------------------
+#
+#  
+# @note this autolookup with "which" should only work for unix systems
+#-------------------------------------------------------------------------------
+# Add this to your PRO to turn on debugging
+# NVCC_FLAGS += -g -G
+# Add this to your PRO file if you want "ptxas option verbose is always useful"??
+# NVCC_FLAGS += --compiler-options -fno-strict-aliasing -use_fast_math --ptxas-options=-v
+#NVCC_FLAGS += --compiler-options -use_fast_math
+#NVCC_FLAGS += -Xptxas="-v"
+NVCC_FLAGS += -lineinfo  -use_fast_math -D_FORCE_INLINES -I.. -Xcompiler -fopenmp,-O2,-fPIC 
+NVCC_FLAGS += -gencode=arch=compute_$$CUDA_COMPUTE_ARCH,code=compute_$$CUDA_COMPUTE_ARCH
+
+#------------------------------ CREATE COMPILER --------------------------------
+#
+# @note the "cuda" extra compiler is executed AFTER your PRO file is parsed...
+# This allows you to leave the load(*.prf) in the preamble of your project, and 
+# have a  CUDA_SOURCES += something.cu later on.
+#-------------------------------------------------------------------------------
+cuda.input = CUDA_SOURCES
+cuda.output = ${QMAKE_FILE_BASE}.o
+cuda.commands = $$NVCC $$NVCC_OPTS $$NVCC_FLAGS -c ${QMAKE_FILE_NAME} -o ${QMAKE_FILE_OUT}
+cuda.depend_command = $$NVCC $$NVCC_OPTS $$NVCC_FLAGS -M $$CUDA_INC ${QMAKE_FILE_NAME}
+cuda.dependency_type = TYPE_C
+QMAKE_EXTRA_COMPILERS += cuda
+
+#--------------------------------- INCLUDE/LIBS --------------------------------
+# 
+# the compiler above generates .o files. These will have to be linked against 
+# the cuda libraries when you will generate your application!
+#-------------------------------------------------------------------------------
+INCLUDEPATH *= $$CUDA/include
+LIBS *= -L$$CUDA/lib64 -lcudart
+
+#--------------------------------- CUDA SOURCES --------------------------------
+# 
+# This function is to be used to add cuda sources as 
+# add_cuda_source(bla.cu blo.cu)
+#-------------------------------------------------------------------------------
+defineTest(add_cuda_source){
+    OTHER_FILES *= $$1
+    CUDA_SOURCES *= $$1
+    export(OTHER_FILES)
+    export(CUDA_SOURCES)
+}
